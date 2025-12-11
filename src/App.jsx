@@ -5,230 +5,520 @@ import {
   Loader2, Cake, Heart
 } from "lucide-react";
 
-import { createOrder, fetchCart, saveCart, fetchOrder, subscribeToOrder } from './apiClient';
+import { createOrder, fetchCart, saveCart, fetchOrder } from "./apiClient";
+
 /* ------------- Constants & Data ------------- */
-const COLLECTION_ORDERS = "doceeser_pedidos";
-const COLLECTION_CARTS = "carts";
 const DELIVERY_FEE = 2.99;
 const ETA_TEXT = "20–35 min"; // tempo estimado fornecido
 
 // --- DADOS ADICIONAIS AÇAÍ ---
 const ACAI_TOPPINGS = [
   { name: "Banana", price: 0.01 },
-  { name: "Morango", price: 2.00 },
-  { name: "Leite Ninho", price: 1.00 },
+  { name: "Morango", price: 2.0 },
+  { name: "Leite Ninho", price: 1.0 },
   { name: "Leite Condensado", price: 0.01 },
-  { name: "Creme de Ninho", price: 1.00 },
-  { name: "Nutella", price: 3.00 },
-  { name: "Amendoim", price: 1.00 },
+  { name: "Creme de Ninho", price: 1.0 },
+  { name: "Nutella", price: 3.0 },
+  { name: "Amendoim", price: 1.0 },
 ];
 
-// ID e preço base do açaí
 const ACAI_ID = 18;
-const ACAI_BASE_PRICE = 17.90;
+const ACAI_BASE_PRICE = 17.9;
 
-// --- LISTA COMPLETA DE PRODUTOS ---
 const initialProducts = [
-  // Categoria BOLOS
+  // ... (mantenha sua lista de produtos — eu mantenho igual ao seu original)
   {
     id: 9,
     name: "Red velvet com Ninho e Morangos",
-    price: 15.90,
-    category: 'bolos',
+    price: 15.9,
+    category: "bolos",
     description: "Massa aveludada e macia, coberta com creme de leite Ninho cremoso e morangos fresquinhos no topo. Uma combinação elegante.",
-    imageUrl: "https://i.imgur.com/3UDWhLR.png"
+    imageUrl: "https://i.imgur.com/3UDWhLR.png",
   },
   {
     id: 2,
     name: "Bolo Cenoura com chocolate",
-    price: 15.90,
-    category: 'bolos',
+    price: 15.9,
+    category: "bolos",
     description: "Mini vulcão de cenoura: uma massa fofinha e úmida de bolo de cenoura, recheada com explosão de calda cremosa de chocolate.",
-    imageUrl: "https://i.imgur.com/aaUdL2b.png"
+    imageUrl: "https://i.imgur.com/aaUdL2b.png",
   },
   {
     id: 10,
     name: "Chocolate com Morangos",
-    price: 15.90,
-    category: 'bolos',
+    price: 15.9,
+    category: "bolos",
     description: "Bolo fofinho de chocolate, cobertura cremosa 50% e morangos fresquinhos.",
-    imageUrl: "https://i.imgur.com/MMbQohl.png"
+    imageUrl: "https://i.imgur.com/MMbQohl.png",
   },
   {
     id: 13,
     name: "Chocolatudo!!!",
-    price: 15.90,
-    category: 'bolos',
+    price: 15.9,
+    category: "bolos",
     description: "Bolo chocolatudo com creme de chocolate 50% e granulados.",
-    imageUrl: "https://i.imgur.com/3Hva4Df.png"
+    imageUrl: "https://i.imgur.com/3Hva4Df.png",
   },
   {
     id: 16,
     name: "Bolo de Ferreiro com Nutella",
-    price: 16.90,
-    category: 'bolos',
+    price: 16.9,
+    category: "bolos",
     description: "Bolo de chocolate com amendoim, Nutella e chocolate 50%.",
-    imageUrl: "https://i.imgur.com/OamNqov.png"
+    imageUrl: "https://i.imgur.com/OamNqov.png",
   },
-
-  // Categoria COPO DA FELICIDADE
+  // Copo da felicidade
   {
     id: 17,
     name: "Copo Oreo com Nutella",
-    price: 24.90,
-    category: 'copo_felicidade',
+    price: 24.9,
+    category: "copo_felicidade",
     description: "Camadas de creme de Ninho, Oreo e Nutella.",
-    imageUrl: "https://i.imgur.com/1EZRMVl.png"
+    imageUrl: "https://i.imgur.com/1EZRMVl.png",
   },
   {
     id: 24,
     name: "Copo Maracujá com Brownie",
-    price: 24.90,
-    category: 'copo_felicidade',
+    price: 24.9,
+    category: "copo_felicidade",
     description: "Creme de maracujá, chocolate 50% e pedaços de brownie.",
-    imageUrl: "https://i.imgur.com/PypEwAz.png"
+    imageUrl: "https://i.imgur.com/PypEwAz.png",
   },
   {
     id: 25,
     name: "Copo Brownie Dois Amores",
-    price: 22.90,
-    category: 'copo_felicidade',
+    price: 22.9,
+    category: "copo_felicidade",
     description: "Dois amores + brownie macio em camadas.",
-    imageUrl: "https://i.imgur.com/mMQtXDB.png"
+    imageUrl: "https://i.imgur.com/mMQtXDB.png",
   },
   {
     id: 26,
     name: "Copo Encanto de Ninho e Morangos",
-    price: 22.90,
-    category: 'copo_felicidade',
+    price: 22.9,
+    category: "copo_felicidade",
     description: "Camadas de creme de Ninho e morangos frescos.",
-    imageUrl: "https://i.imgur.com/EgFhhwL.png"
+    imageUrl: "https://i.imgur.com/EgFhhwL.png",
   },
   {
     id: 27,
     name: "Copo de Brownie com Ferreiro e Nutella",
-    price: 26.90,
-    category: 'copo_felicidade',
+    price: 26.9,
+    category: "copo_felicidade",
     description: "Brownie, Ferrero, chocolate 50% e Nutella.",
-    imageUrl: "https://i.imgur.com/t6xeVDf.png"
+    imageUrl: "https://i.imgur.com/t6xeVDf.png",
   },
-
-  // Categoria BROWNIES
+  // Brownies
   {
     id: 20,
     name: "Brownie De Ninho e Nutella",
-    price: 11.90,
-    category: 'brownie',
+    price: 11.9,
+    category: "brownie",
     description: "Brownie com creme de Ninho e Nutella.",
-    imageUrl: "https://i.imgur.com/vWdYZ8K.png"
+    imageUrl: "https://i.imgur.com/vWdYZ8K.png",
   },
   {
     id: 21,
     name: "Brownie Recheado com Nutella e Morangos",
-    price: 22.90,
-    category: 'brownie',
+    price: 22.9,
+    category: "brownie",
     description: "Brownie recheado com creme de Ninho, Nutella e morangos.",
-    imageUrl: "https://i.imgur.com/P1pprjF.png"
+    imageUrl: "https://i.imgur.com/P1pprjF.png",
   },
   {
     id: 22,
     name: "Brownie Ferreiro com Nutella",
-    price: 11.90,
-    category: 'brownie',
+    price: 11.9,
+    category: "brownie",
     description: "Brownie com Nutella e amendoim torrado.",
-    imageUrl: "https://i.imgur.com/rmp3LtH.png"
+    imageUrl: "https://i.imgur.com/rmp3LtH.png",
   },
   {
     id: 23,
     name: "Brownie Duo com Oreo",
-    price: 11.90,
-    category: 'brownie',
+    price: 11.9,
+    category: "brownie",
     description: "Brownie com cobertura de chocolate e pedaços de Oreo.",
-    imageUrl: "https://i.imgur.com/8IbcWWj.png"
+    imageUrl: "https://i.imgur.com/8IbcWWj.png",
   },
-
-  // Categoria AÇAÍ
+  // Açaí
   {
     id: ACAI_ID,
     name: "Copo de Açaí 250ml",
     price: ACAI_BASE_PRICE,
-    category: 'acai',
+    category: "acai",
     description: "Copo de Açaí cremoso — escolha seus acompanhamentos.",
-    imageUrl: "https://i.imgur.com/OrErP8N.png"
+    imageUrl: "https://i.imgur.com/OrErP8N.png",
   },
-
-  // Categoria SALGADOS
+  // Salgados
   {
     id: 6,
     name: "Empada de Camarão e Requeijão",
-    price: 12.00,
-    category: 'salgado',
+    price: 12.0,
+    category: "salgado",
     description: "Camarão cremoso com requeijão. Feito na marmitinha.",
-    imageUrl: "https://i.imgur.com/rV18DkJ.png"
-  }
+    imageUrl: "https://i.imgur.com/rV18DkJ.png",
+  },
 ];
 
 const categories = {
-  all: 'Todos os Produtos',
-  bolos: 'Bolos',
-  copo_felicidade: 'Copo da Felicidade',
-  brownie: 'Brownies',
-  acai: 'Açaí',
-  salgado: 'Salgados',
+  all: "Todos os Produtos",
+  bolos: "Bolos",
+  copo_felicidade: "Copo da Felicidade",
+  brownie: "Brownies",
+  acai: "Açaí",
+  salgado: "Salgados",
 };
 
-const PAYMENT_METHODS = [{ id: 'pix', name: 'Pix', details: 'Pagamento via QR Code ou chave Pix.' }];
+const PAYMENT_METHODS = [{ id: "pix", name: "Pix", details: "Pagamento via QR Code ou chave Pix." }];
 
 /* ------------- Helpers ------------- */
-const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ',')}`;
+const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace(".", ",")}`;
 
+/* ---------- LocalStorage helpers for 'Meus Pedidos' ---------- */
+const LOCAL_ORDERS_KEY = "doceeser_local_orders";
+
+const saveLocalOrderId = (orderId) => {
   try {
-    const pedidosRef = collection(db, COLLECTION_ORDERS);
-    const payload = {
-      items: cart,
-      total,
-      customer: customer || {},
-      deliveryType,
-      status: 'novo',
-      createdAt: new Date().toISOString()
-    };
-    const docRef = await addDoc(pedidosRef, payload);
-    return docRef.id;
-  } catch (err) {
-    console.error("Erro ao criar pedido:", err);
-    return null;
+    const existingJson = localStorage.getItem(LOCAL_ORDERS_KEY);
+    const arr = existingJson ? JSON.parse(existingJson) : [];
+    const newArr = [orderId, ...arr.filter((id) => id !== orderId)];
+    localStorage.setItem(LOCAL_ORDERS_KEY, JSON.stringify(newArr.slice(0, 50)));
+  } catch (e) {
+    console.warn("Erro salvando localOrders", e);
   }
 };
 
+const readLocalOrders = () => {
   try {
-    await saveCart(userId, { items: cart });
-  } catch(err) { console.error('Erro ao salvar carrinho:', err); }
+    const existingJson = localStorage.getItem(LOCAL_ORDERS_KEY);
+    return existingJson ? JSON.parse(existingJson) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+/* ------------- Small UI components ------------- */
+const ProductCard = ({ product, onAdd, onCustomize }) => {
+  const isAcai = product.id === ACAI_ID;
+  return (
+    <div className="flex flex-col rounded-xl shadow-lg overflow-hidden bg-white">
+      <div className="h-40 overflow-hidden relative">
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          className="w-full h-full object-cover"
+          onError={(e) => (e.target.src = "https://placehold.co/400x250/cccccc/333333?text=Doce+É+Ser")}
+        />
+        <div className="absolute top-0 right-0 p-2 rounded-bl-lg bg-amber-600 text-white text-xs font-bold">{product.category}</div>
+      </div>
+      <div className="p-4 flex-grow flex flex-col justify-between">
+        <div>
+          <h3 className="text-lg font-bold">{product.name}</h3>
+          <p className="text-sm text-gray-600">{product.description}</p>
+        </div>
+        <div className="mt-4 flex justify-between items-center">
+          <span className="font-extrabold text-amber-700">{formatBR(product.price)}</span>
+          <button onClick={() => (isAcai ? onCustomize(product) : onAdd(product))} className="bg-amber-600 text-white p-2 rounded-full">
+            {isAcai ? "Customizar" : "Adicionar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const OrderSummary = ({ cart, deliveryType = "delivery" }) => {
+  const subtotal = cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
+  const deliveryFee = deliveryType === "delivery" ? DELIVERY_FEE : 0;
+  const total = subtotal + deliveryFee;
+  if (!cart || cart.length === 0) return null;
+  return (
+    <div className="bg-white p-4 rounded-xl shadow-lg">
+      <h4 className="font-bold text-lg">Resumo do Pedido</h4>
+      <div className="mt-3 text-sm text-gray-600">
+        <div className="flex justify-between"><span>Subtotal</span><span>{formatBR(subtotal)}</span></div>
+        <div className="flex justify-between"><span>Entrega</span><span>{deliveryType === "delivery" ? formatBR(deliveryFee) : "GRÁTIS"}</span></div>
+        <hr className="my-2" />
+        <div className="flex justify-between font-bold"><span>Total</span><span>{formatBR(total)}</span></div>
+      </div>
+      <div className="mt-3 text-xs text-gray-500">
+        Itens:
+        <ul className="mt-1 list-disc ml-5">
+          {cart.map((it, i) => <li key={it.uniqueId || `${it.id}-${i}`}>{(it.quantity||1)}x {it.name} {it.toppings ? `(${it.toppings.join(', ')})` : ''}</li>)}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+/* ------------- Tracking & MyOrders components (polling) ------------- */
+const OrderTrackingPage = ({ orderId }) => {
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!orderId) return;
+    let mounted = true;
+    const load = async () => {
+      try {
+        const data = await fetchOrder(orderId);
+        if (!mounted) return;
+        setOrder(data ? { id: data._id || data.id, ...data } : null);
+      } catch (e) {
+        console.error("Erro loading order", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+    const iv = setInterval(load, 3000);
+    return () => { mounted = false; clearInterval(iv); };
+  }, [orderId]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (!order) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-white p-6 rounded shadow text-center">
+        <h3 className="font-bold text-lg">Pedido não encontrado</h3>
+        <p className="text-sm text-gray-600">Verifique se o ID está correto.</p>
+      </div>
+    </div>
+  );
+
+  const status = order.status || "—";
+  const subtitle = {
+    novo: "Pedido recebido",
+    preparando: "Estamos preparando",
+    pronto: "Pedido pronto",
+    entregue: "Entregue",
+  }[status] || status;
+
+  const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString() : "";
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold">Pedido: <span className="text-amber-600">{order.id}</span></h2>
+              <p className="text-sm text-gray-600">{subtitle}</p>
+              <p className="text-xs text-gray-400 mt-1">Criado: {createdAt}</p>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold">{order.total ? formatBR(Number(order.total)) : ""}</div>
+              <div className="text-sm text-gray-500">{ETA_TEXT}</div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <h4 className="font-semibold">Itens</h4>
+            <ul className="list-disc ml-5 text-sm mt-2">
+              {Array.isArray(order.items) ? order.items.map((it, i) => (
+                <li key={i}>{(it.quantity || 1)}x {it.name} {it.toppings ? `(+${it.toppings.join(", ")})` : ""}</li>
+              )) : <li>—</li>}
+            </ul>
+          </div>
+
+          <div className="mt-4">
+            <h4 className="font-semibold">Endereço / Cliente</h4>
+            <p className="text-sm">{order.customer?.nome || "—"}</p>
+            <p className="text-xs text-gray-500">{order.customer?.telefone || ""}</p>
+            <p className="text-xs text-gray-500">{order.customer?.rua ? `${order.customer.rua}, ${order.customer.numero || ""} — ${order.customer.bairro || ""}` : ""}</p>
+          </div>
+
+          <div className="mt-6 flex gap-2">
+            <button onClick={() => navigator.clipboard.writeText(window.location.href)} className="px-4 py-2 rounded bg-amber-700 text-white">Copiar link</button>
+            <a href="/meus-pedidos" className="px-4 py-2 rounded border">Meus pedidos</a>
+            <a href="/" className="px-4 py-2 rounded border">Voltar ao menu</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MyOrdersPage = () => {
+  const [localIds, setLocalIds] = useState(readLocalOrders());
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => setLocalIds(readLocalOrders()), []);
+
+  useEffect(() => {
+    if (!localIds || localIds.length === 0) { setLoading(false); return; }
+    let mounted = true;
+    const result = [];
+    const unsub = [];
+
+    localIds.forEach((id) => {
+      const loadOne = async () => {
+        try {
+          const data = await fetchOrder(id);
+          const payload = data ? { id: data._id || data.id, ...data } : null;
+          const idx = result.findIndex((r) => r.id === id);
+          if (idx === -1 && payload) result.push(payload);
+          else if (idx > -1) {
+            if (payload) result[idx] = payload;
+            else result.splice(idx, 1);
+          }
+          const ordered = localIds.map((i) => result.find((r) => r?.id === i)).filter(Boolean);
+          if (mounted) setOrders(ordered);
+          setLoading(false);
+        } catch (e) {
+          console.error("Erro loading myorder", e);
+          setLoading(false);
+        }
+      };
+      loadOne();
+      const iv = setInterval(loadOne, 4000);
+      unsub.push(() => clearInterval(iv));
+    });
+
+    return () => { mounted = false; unsub.forEach((u) => u()); };
+  }, [localIds]);
+
+  const handleOpen = (id) => (window.location.href = `/pedido/${id}`);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-2xl font-bold mb-4">Meus Pedidos</h2>
+        {loading && <div className="p-6 bg-white rounded shadow text-center"><Loader2 className="animate-spin" /></div>}
+        {!loading && orders.length === 0 && <div className="p-6 bg-white rounded shadow text-center">Nenhum pedido salvo neste dispositivo.</div>}
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <div key={order.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
+              <div>
+                <div className="font-semibold">Pedido: <span className="text-amber-600">{order.id}</span></div>
+                <div className="text-sm text-gray-600">{order.status || "—"} — {order.createdAt ? new Date(order.createdAt).toLocaleString() : ""}</div>
+                <div className="text-xs text-gray-500 mt-1">{order.items?.length || 0} itens — {formatBR(Number(order.total || 0))}</div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => handleOpen(order.id)} className="px-3 py-1 bg-amber-700 text-white rounded">Acompanhar</button>
+                <button onClick={() => { navigator.clipboard.writeText(window.location.origin + `/pedido/${order.id}`); alert("Link copiado"); }} className="px-3 py-1 border rounded">Copiar link</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ------------- App (main) ------------- */
+function App() {
+  const [page, setPage] = useState("menu"); // menu, cart, delivery, payment, about, meus-pedidos, tracking
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [cart, setCart] = useState([]);
+  const [deliveryType, setDeliveryType] = useState("delivery");
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isAcaiModalOpen, setIsAcaiModalOpen] = useState(false);
+  const [acaiProduct, setAcaiProduct] = useState(null);
+
+  const [customerInfo, setCustomerInfo] = useState({
+    nome: "",
+    telefone: "",
+    rua: "",
+    numero: "",
+    bairro: "",
+    referencia: "",
+  });
+
+  const [lastCreatedOrderId, setLastCreatedOrderId] = useState(null);
+
+  const cartItemCount = useMemo(() => cart.reduce((s, i) => s + (i.quantity || 1), 0), [cart]);
+
+  /* ----------------- Auth & cart persistence (local anonymous) ----------------- */
+  useEffect(() => {
+    let uid = localStorage.getItem("doceeser_user");
+    if (!uid) {
+      uid = "u_" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem("doceeser_user", uid);
+    }
+    setUserId(uid);
+    setIsAuthReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthReady || !userId) {
+      setIsLoading(false);
+      return;
+    }
+    let mounted = true;
+    const load = async () => {
+      try {
+        const cartData = await fetchCart(userId);
+        if (!mounted) return;
+        setCart(Array.isArray(cartData.items) ? cartData.items : []);
+      } catch (e) {
+        console.error("Erro buscando carrinho", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+    const interval = setInterval(load, 4000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, [isAuthReady, userId]);
+
+  /* ----------------- Url handling for /pedido/:id and /meus-pedidos ----------------- */
+  useEffect(() => {
+    const p = window.location.pathname || "/";
+    if (p.startsWith("/pedido/")) {
+      setPage("tracking");
+    } else if (p === "/meus-pedidos") {
+      setPage("meus-pedidos");
+    }
+  }, []);
+
+  /* ----------------- Cart ops ----------------- */
+  const addToCart = useCallback((product) => {
+    setCart((prev) => {
+      const existing = prev.find((p) => p.id === product.id && !p.isCustom);
+      if (existing) return prev.map((p) => (p.id === product.id && !p.isCustom ? { ...p, quantity: (p.quantity || 1) + 1 } : p));
+      return [...prev, { ...product, quantity: 1, isCustom: false }];
+    });
   }, []);
 
   const openAcaiModal = (product) => { setAcaiProduct(product); setIsAcaiModalOpen(true); };
   const closeAcaiModal = () => { setAcaiProduct(null); setIsAcaiModalOpen(false); };
 
   const addCustomAcai = (customItem) => {
-    setCart(prev => [...prev, customItem]);
+    setCart((prev) => [...prev, customItem]);
     closeAcaiModal();
   };
 
   const updateQuantity = (key, delta) => {
-    setCart(prev => prev.flatMap(it => {
+    setCart((prev) => prev.flatMap((it) => {
       const k = it.uniqueId || it.id;
       if (k !== key) return it;
-      const nq = (it.quantity||1) + delta;
+      const nq = (it.quantity || 1) + delta;
       if (nq <= 0) return [];
       return { ...it, quantity: nq };
     }));
   };
 
-  const removeItem = (key) => setCart(prev => prev.filter(it => (it.uniqueId || it.id) !== key));
+  const removeItem = (key) => setCart((prev) => prev.filter((it) => (it.uniqueId || it.id) !== key));
 
-  /* ----------------- Checkout & create order (modified to save local and redirect to tracking) ----------------- */
+  /* ----------------- Save cart to API when cart changes ----------------- */
+  useEffect(() => {
+    if (!isAuthReady || !userId) return;
+    const t = setTimeout(() => {
+      saveCart(userId, { items: cart }).catch((e) => console.error("Erro salvando carrinho", e));
+    }, 700);
+    return () => clearTimeout(t);
+  }, [cart, isAuthReady, userId]);
+
+  /* ----------------- Checkout & create order ----------------- */
   const subtotal = useMemo(() => cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0), [cart]);
-  const deliveryFee = deliveryType === 'delivery' ? DELIVERY_FEE : 0;
-  const total = subtotal + deliveryFee;
+  const deliveryFeeCalc = deliveryType === "delivery" ? DELIVERY_FEE : 0;
+  const total = subtotal + deliveryFeeCalc;
 
   const handleCreateOrder = async () => {
     if (cart.length === 0) { alert("Carrinho vazio."); return null; }
@@ -237,19 +527,30 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
       return null;
     }
 
-    if (id) {
-      // salva localmente
-      saveLocalOrderId(id);
-      setLastCreatedOrderId(id);
-      setCart([]);
-      // redireciona para página de pedido e garante que o App renderize a página de rastreio
-      window.history.pushState({}, '', `/pedido/${id}`);
-      setPage('tracking');
-
-      // show friendly confirmation (iFood-style) by keeping lastCreatedOrderId visible
-      // (the tracking page will show real-time status)
-      return id;
-    } else {
+    try {
+      const payload = {
+        items: cart,
+        total,
+        customer: customerInfo,
+        deliveryType,
+        status: "novo",
+        createdAt: new Date().toISOString(),
+      };
+      const res = await createOrder(payload);
+      const id = res && (res.id || res._id) ? (res.id || res._id) : null;
+      if (id) {
+        saveLocalOrderId(id);
+        setLastCreatedOrderId(id);
+        setCart([]);
+        window.history.pushState({}, "", `/pedido/${id}`);
+        setPage("tracking");
+        return id;
+      } else {
+        alert("Erro ao criar pedido. Tente novamente.");
+        return null;
+      }
+    } catch (err) {
+      console.error("Erro ao criar pedido:", err);
       alert("Erro ao criar pedido. Tente novamente.");
       return null;
     }
@@ -260,14 +561,14 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
     <div className="p-4 md:p-8">
       <h2 className="text-3xl font-extrabold mb-6">{categories[activeCategory]}</h2>
       <div className="flex gap-3 mb-6 flex-wrap">
-        {Object.keys(categories).map(k => (
-          <button key={k} onClick={()=>setActiveCategory(k)} className={`px-4 py-2 rounded ${k===activeCategory ? 'bg-amber-700 text-white' : 'bg-gray-100'}`}>
-            {categories[k].split(' ')[0]}
+        {Object.keys(categories).map((k) => (
+          <button key={k} onClick={() => setActiveCategory(k)} className={`px-4 py-2 rounded ${k === activeCategory ? "bg-amber-700 text-white" : "bg-gray-100"}`}>
+            {categories[k].split(" ")[0]}
           </button>
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {initialProducts.filter(p => activeCategory === 'all' ? true : p.category === activeCategory).map(p => (
+        {initialProducts.filter((p) => (activeCategory === "all" ? true : p.category === activeCategory)).map((p) => (
           <ProductCard key={p.id} product={p} onAdd={addToCart} onCustomize={openAcaiModal} />
         ))}
       </div>
@@ -281,7 +582,7 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
         <div className="text-center p-10 bg-white rounded shadow">
           <ShoppingCart className="mx-auto w-12 h-12 text-gray-300" />
           <p className="mt-3">Seu carrinho está vazio.</p>
-          <button onClick={()=>setPage('menu')} className="mt-4 text-amber-700">Voltar ao Menu</button>
+          <button onClick={() => setPage("menu")} className="mt-4 text-amber-700">Voltar ao Menu</button>
         </div>
       ) : (
         <div className="lg:flex lg:space-x-6">
@@ -293,26 +594,26 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
                   <div className="flex-grow">
                     <div className="font-semibold">{it.name}</div>
                     <div className="text-sm text-gray-500">{formatBR(it.price)} / un</div>
-                    {it.isCustom && it.toppings && <div className="text-xs text-gray-600">+ {it.toppings.join(', ')}</div>}
+                    {it.isCustom && it.toppings && <div className="text-xs text-gray-600">+ {it.toppings.join(", ")}</div>}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={()=>updateQuantity(key, -1)} className="p-1 border rounded"><Minus className="w-4 h-4" /></button>
+                    <button onClick={() => updateQuantity(key, -1)} className="p-1 border rounded"><Minus className="w-4 h-4" /></button>
                     <div className="font-bold">{it.quantity || 1}</div>
-                    <button onClick={()=>updateQuantity(key, 1)} className="p-1 border rounded"><Plus className="w-4 h-4" /></button>
+                    <button onClick={() => updateQuantity(key, 1)} className="p-1 border rounded"><Plus className="w-4 h-4" /></button>
                   </div>
                   <div className="ml-4 font-bold text-amber-700">{formatBR((it.price || 0) * (it.quantity || 1))}</div>
-                  <button onClick={()=>removeItem(key)} className="ml-4 text-red-500"><X /></button>
+                  <button onClick={() => removeItem(key)} className="ml-4 text-red-500"><X /></button>
                 </div>
               );
             })}
             <div>
-              <button onClick={()=>setPage('menu')} className="mt-4 text-amber-700">Continuar comprando</button>
+              <button onClick={() => setPage("menu")} className="mt-4 text-amber-700">Continuar comprando</button>
             </div>
           </div>
 
           <div className="lg:w-80 mt-6 lg:mt-0">
             <OrderSummary cart={cart} deliveryType={deliveryType} />
-            <button onClick={()=>setPage('delivery')} className="w-full mt-4 bg-amber-700 text-white py-2 rounded">Prosseguir para Entrega</button>
+            <button onClick={() => setPage("delivery")} className="w-full mt-4 bg-amber-700 text-white py-2 rounded">Prosseguir para Entrega</button>
           </div>
         </div>
       )}
@@ -323,28 +624,28 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
       <h3 className="text-2xl font-bold mb-4">Entrega</h3>
       <div className="grid md:grid-cols-2 gap-4">
-        <label className={`p-4 rounded border ${deliveryType==='delivery' ? 'border-amber-600 bg-amber-50' : 'bg-white'}`}>
-          <input type="radio" checked={deliveryType==='delivery'} onChange={()=>setDeliveryType('delivery')} className="hidden" />
+        <label className={`p-4 rounded border ${deliveryType === "delivery" ? "border-amber-600 bg-amber-50" : "bg-white"}`}>
+          <input type="radio" checked={deliveryType === "delivery"} onChange={() => setDeliveryType("delivery")} className="hidden" />
           <div className="font-semibold">Entrega (R$ {DELIVERY_FEE.toFixed(2)})</div>
           <div className="text-sm text-gray-600 mt-2">
             <input placeholder="CEP" className="w-full p-2 border rounded mb-2" />
-            <input placeholder="Rua, Número, Bairro" value={customerInfo.rua} onChange={(e)=>setCustomerInfo(prev=>({...prev, rua: e.target.value}))} className="w-full p-2 border rounded" />
+            <input placeholder="Rua, Número, Bairro" value={customerInfo.rua} onChange={(e) => setCustomerInfo((prev) => ({ ...prev, rua: e.target.value }))} className="w-full p-2 border rounded" />
           </div>
         </label>
 
-        <label className={`p-4 rounded border ${deliveryType==='retirada' ? 'border-amber-600 bg-amber-50' : 'bg-white'}`}>
-          <input type="radio" checked={deliveryType==='retirada'} onChange={()=>setDeliveryType('retirada')} className="hidden" />
+        <label className={`p-4 rounded border ${deliveryType === "retirada" ? "border-amber-600 bg-amber-50" : "bg-white"}`}>
+          <input type="radio" checked={deliveryType === "retirada"} onChange={() => setDeliveryType("retirada")} className="hidden" />
           <div className="font-semibold">Retirada na loja (GRÁTIS)</div>
           <div className="text-sm text-gray-600 mt-2">
-            <input placeholder="Nome para retirada" value={customerInfo.nome} onChange={(e)=>setCustomerInfo(prev=>({...prev, nome: e.target.value}))} className="w-full p-2 border rounded mb-2" />
-            <input placeholder="Telefone" value={customerInfo.telefone} onChange={(e)=>setCustomerInfo(prev=>({...prev, telefone: e.target.value}))} className="w-full p-2 border rounded" />
+            <input placeholder="Nome para retirada" value={customerInfo.nome} onChange={(e) => setCustomerInfo((prev) => ({ ...prev, nome: e.target.value }))} className="w-full p-2 border rounded mb-2" />
+            <input placeholder="Telefone" value={customerInfo.telefone} onChange={(e) => setCustomerInfo((prev) => ({ ...prev, telefone: e.target.value }))} className="w-full p-2 border rounded" />
           </div>
         </label>
       </div>
 
       <div className="mt-4 flex gap-2">
-        <button onClick={()=>setPage('payment')} className="bg-amber-700 text-white px-4 py-2 rounded">Prosseguir para Pagamento</button>
-        <button onClick={()=>setPage('cart')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button>
+        <button onClick={() => setPage("payment")} className="bg-amber-700 text-white px-4 py-2 rounded">Prosseguir para Pagamento</button>
+        <button onClick={() => setPage("cart")} className="bg-gray-200 px-4 py-2 rounded">Voltar</button>
       </div>
     </div>
   );
@@ -364,7 +665,7 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
             ))}
           </div>
 
-          {paymentMethod === 'pix' && (
+          {paymentMethod === "pix" && (
             <div className="mt-4">
               <div className="bg-white p-4 rounded shadow">
                 <div className="text-center font-bold text-green-700 mb-3">Pagamento via PIX</div>
@@ -405,15 +706,12 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
   );
 
   /* ------------- Render logic ------------- */
-  // If path is /pedido/:id and we set page 'tracking', we extract id from path
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const trackedOrderIdFromPath = currentPath.startsWith('/pedido/') ? currentPath.replace('/pedido/', '').split('/')[0] : null;
+  const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
+  const trackedOrderIdFromPath = currentPath.startsWith("/pedido/") ? currentPath.replace("/pedido/", "").split("/")[0] : null;
 
-  if (page === 'tracking' && trackedOrderIdFromPath) {
-    // Show tracking page and, if lastCreatedOrderId present, show confirmation header
+  if (page === "tracking" && trackedOrderIdFromPath) {
     return (
       <div>
-        {/* Optional small confirmation banner if we just created the order */}
         {lastCreatedOrderId === trackedOrderIdFromPath && (
           <div className="bg-green-600 text-white p-4 text-center">
             <div className="max-w-3xl mx-auto">
@@ -435,11 +733,10 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
     );
   }
 
-  if (page === 'meus-pedidos') {
+  if (page === "meus-pedidos") {
     return <MyOrdersPage />;
   }
 
-  // default app layout
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 bg-white shadow p-4">
@@ -463,11 +760,11 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
       </header>
 
       <main className="max-w-7xl mx-auto pb-12">
-        {page === 'menu' && MenuPage}
-        {page === 'cart' && CartPage}
-        {page === 'delivery' && DeliveryPage}
-        {page === 'payment' && PaymentPage}
-        {page === 'about' && AboutPage}
+        {page === "menu" && MenuPage}
+        {page === "cart" && CartPage}
+        {page === "delivery" && DeliveryPage}
+        {page === "payment" && PaymentPage}
+        {page === "about" && AboutPage}
       </main>
 
       {isAcaiModalOpen && acaiProduct && (
@@ -495,7 +792,7 @@ const formatBR = (value) => `R$ ${Number(value || 0).toFixed(2).replace('.', ','
       </footer>
     </div>
   );
-};
+}
 
 /* ------------- Acai Modal Component ------------- */
 const AcaiModal = ({ product, onClose, onAdd }) => {
